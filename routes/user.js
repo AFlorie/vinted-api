@@ -26,7 +26,6 @@ router.post("/user/signup", async (req, res) => {
     const userCheck = await User.findOne({ email: email });
     let result = {};
     let statusCode = 0;
-    //console.log(userCheck);
 
     if (userCheck === null) {
       if (username && email && password) {
@@ -34,29 +33,44 @@ router.post("/user/signup", async (req, res) => {
         const hash = SHA256(password + salt).toString(encbase64);
         const token = uid2(16);
 
-        const picturePath = req.files.picture.path;
-        //console.log(picturePath);
-        const pictureCloud = await cloudinary.uploader.upload(picturePath, {
-          folder: "/vinted/profilePicture",
-        });
+        // if (req.files.picture.path) {
+        //   const picturePath = req.files.picture.path;
+        //   //console.log(picturePath);
+        //   const pictureCloud = await cloudinary.uploader.upload(picturePath, {
+        //     folder: "/vinted/profilePicture",
+        //   });
 
+        //   const newUser = new User({
+        //     email: email,
+        //     account: {
+        //       username: username,
+        //       phone: phone,
+        //       avatar: pictureCloud,
+        //     },
+        //     token: token,
+        //     hash: hash,
+        //     salt: salt,
+        //   });
+        //   await newUser.save();
+        // } else {
+        console.log("coucou");
         const newUser = new User({
           email: email,
           account: {
             username: username,
             phone: phone,
-            avatar: pictureCloud,
           },
           token: token,
           hash: hash,
           salt: salt,
         });
         await newUser.save();
+        //  }
 
-        const userCreated = await User.findOne({ email: email });
+        // const userCreated = await User.findOne({ email: email });
         statusCode = 200;
         result = {
-          _id: userCreated._id,
+          _id: newUser._id,
           token: token,
           account: {
             username: username,
@@ -75,7 +89,7 @@ router.post("/user/signup", async (req, res) => {
     }
     res.status(statusCode).json({ result });
   } catch (error) {
-    res.status(400).send(error.message);
+    res.status(400).json(error.message);
   }
 });
 
